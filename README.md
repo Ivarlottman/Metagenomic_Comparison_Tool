@@ -1,6 +1,6 @@
 # Metagenomic_Comparison_Tool
 
-Made by Ivar Lottman
+Made by Ivar Lottman  
 Teachers: Michiel Noback and Marcel Kempenaar  
 
 ## Introduction  

@@ -1,0 +1,11 @@
+prefetch PRJNA1046651
+
+fasterq-dump /students/2025-2026/Ivar/SRR27065529 -O /students/2025-2026/Ivar/
+
+kraken2 --db /data/datasets/KRAKEN2_INDEX/16S_RDP --threads 40 --report /students/2025-2026/Ivar/SRDP29.kreport /students/2025-2026/Ivar/SRR27065529.fastq > /students/2025-2026/Ivar/srdp29.txt 2> /students/2025-2026/Ivar/s29rdp.log &
+
+kraken2 --db /data/datasets/KRAKEN2_INDEX/16S_RDP --threads 40 --report /students/2025-2026/Ivar/SRDP30.kreport /students/2025-2026/Ivar/SRR27065530.fastq > /students/2025-2026/Ivar/srdp30.txt 2> /students/2025-2026/Ivar/s30rdp.log &
+
+kraken2 --db /data/datasets/KRAKEN2_INDEX/16S_RDP --threads 40 --report /students/2025-2026/Ivar/SRDP31.kreport /students/2025-2026/Ivar/SRR27065531.fastq > /students/2025-2026/Ivar/srdp31.txt 2> /students/2025-2026/Ivar/s31rdp.log &
+
+scp -r -P 4235 ilottman@bioinf.nl:/students/2025-2026/Ivar/SRDP29.kreport /home/ivar-lottman/Desktop/bioinformatica/jaar_3/java_ap/Metagenomic_Comparison_Tool/Recources
