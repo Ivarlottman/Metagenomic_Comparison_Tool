@@ -11,15 +11,17 @@ public enum Taxon {
     F("Family"),
     G("Genus"),
     S("Species"),
+    PC("Primitive Classification"),
     A("ALL");
     private final String name;
 
-    Taxon(String name){
-        this.name = name;
-    }
+    Taxon(String name){this.name = name;}
 
     public static Taxon fromString(String taxon){
-        switch (taxon){
+        if(taxon.isEmpty()){return Taxon.PC;}
+        char temp = taxon.charAt(0);
+        String input = Character.toString(temp);
+        switch (input){
             case "U": return Taxon.U;
             case "R": return Taxon.R;
             case "D": return Taxon.D;
@@ -31,7 +33,8 @@ public enum Taxon {
             case "G": return Taxon.G;
             case "S": return Taxon.S;
             case "A": return Taxon.A;
-            default: throw new IllegalArgumentException("Unknown taxon: " + taxon);
+            case "1": return Taxon.PC; //TODO ander fiks?
+            default: throw new IllegalArgumentException("Unknown taxon: " + taxon+" end");
         }
     }
 
