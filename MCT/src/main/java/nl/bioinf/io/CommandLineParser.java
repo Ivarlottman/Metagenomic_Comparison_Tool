@@ -1,26 +1,23 @@
 package nl.bioinf.io;
 
-import nl.bioinf.DataManagement.GroupAnalyser;
+import nl.bioinf.data_management.GroupAnalyser;
 import picocli.CommandLine.*;
-import javax.swing.*;
-import java.io.File;
+
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
-
-/**
- * Java documentation style class lvl
- * located in /build/libs
- * testcommand
- * java -jar MTC-1.0-SNAPSHOT-all.jar /home/ivar-lottman/Desktop/bioinformatica/jaar_3/java_ap/Metagenomic_Comparison_Tool/Recources/config_1.txt /home/ivar-lottman/Desktop/bioinformatica/jaar_3/java_ap/Metagenomic_Comparison_Tool/Recources/config_2.txt
- *
- * @author Ivar
- * @version 0
- * */
 
 @Command(name = "CommandLineParser")
 public class CommandLineParser implements Runnable {
+    /**
+     * Java documentation style class lvl
+     * located in /build/libs
+     * testcommand
+     * java -jar MTC-1.0-SNAPSHOT-all.jar /home/ivar-lottman/Desktop/bioinformatica/jaar_3/java_ap/Metagenomic_Comparison_Tool/Recources/config_1.txt /home/ivar-lottman/Desktop/bioinformatica/jaar_3/java_ap/Metagenomic_Comparison_Tool/Recources/config_2.txt
+     *
+     * @author Ivar
+     * @version 0
+     * */
     @Option(names = {"-o", "-output"}, description = "output file, Default value: ${DEFAULT-VALUE}")
     String outputFile = System.getProperty("user.dir");
 
@@ -66,14 +63,18 @@ public class CommandLineParser implements Runnable {
         //try catch
 
         // TODO build testcases for min abundance count
+        // TODO move filereading if statement to method
         Path configPathOne = Paths.get(configOne);
         if (!Files.isReadable(configPathOne))
         {throw new IllegalArgumentException("config file= "+configPathOne+ " is not readable");}
+
         Path configPathTwo = Paths.get(configTwo);
         if (!Files.isReadable(configPathTwo))
         {throw new IllegalArgumentException("config file= "+configPathOne+ " is not readable");}
 
-        GroupAnalyser analyserObject = new GroupAnalyser(configPathOne, configPathTwo,
+        Path[] placeholder = {configPathOne, configPathTwo};
+
+        GroupAnalyser analyserObject = new GroupAnalyser(placeholder,
                 methodType, analysisType, taxonLevel, countType, minAbundanceCount);
     }
 }

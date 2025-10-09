@@ -1,4 +1,4 @@
-package nl.bioinf.DataManagement;
+package nl.bioinf.data_management;
 
 import nl.bioinf.io.*;
 
@@ -11,25 +11,32 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class GroupAnalyser {
-    Path groupOnePath;
-    Path groupTwoPath;
-    SampleGroup sampleGroupOne;
-    SampleGroup sampleGroupTwo;
-    String groupOneName;
-    String groupTwoName;
+    /**
+     * text
+     * @author Ivar Lottman
+     * @version 0
+     * */
+    Path[] groupPaths;
+    //List<String> groupNames;
+    List<SampleGroup> sampleGroups;
+    //List<ConfigGroup> configGroups;
 
 
-    public GroupAnalyser(Path groupOnePath, Path groupTwoPath, StatsMethodType statmethod,
+    public GroupAnalyser(Path[] groupPaths, StatsMethodType statmethod,
                          AnalysisType analysisType, Taxon taxonLevel,
                          CountType countType, int minAbundanceCount) {
-        this.groupOnePath = groupOnePath;
-        this.groupOneName = groupOnePath.getFileName().toString();
-        this.groupTwoPath = groupTwoPath;
-        this.groupTwoName = groupTwoPath.getFileName().toString();
-        this.sampleGroupOne = new SampleGroup(groupReader(groupOnePath),
-                groupOneName, statmethod, countType, taxonLevel);
-        this.sampleGroupTwo = new SampleGroup(groupReader(groupTwoPath),
-                groupTwoName, statmethod, countType, taxonLevel);
+
+        this.groupPaths = groupPaths;
+        this.sampleGroups = new ArrayList<>();
+        // TODO bespreek met michiel of het nog nodig is om een group record te maken
+        for (int i = 0; i < groupPaths.length; i++ ){
+            String groupName = groupPaths[i].getFileName().toString();
+            SampleGroup group = new SampleGroup(groupReader(groupPaths[i]),groupName,
+                    statmethod, countType, taxonLevel);
+            sampleGroups.add(group);
+            
+
+        }
 
     }
 
@@ -43,6 +50,7 @@ public class GroupAnalyser {
                 if (line.isEmpty()) {continue;}
 
                 Path p = Paths.get(line);
+                System.out.println(p);
                 if(Files.isReadable(p)){paths.add(p);}
                 else throw new IOException("File not readable "+line);
             }

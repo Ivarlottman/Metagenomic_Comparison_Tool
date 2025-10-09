@@ -1,5 +1,9 @@
 package nl.bioinf.io;
-
+/**
+ * text
+ * @author Ivar Lottman
+ * @version 0
+ * */
 public enum Taxon {
     U("Unclassified"),
     R("Root"),
@@ -11,14 +15,14 @@ public enum Taxon {
     F("Family"),
     G("Genus"),
     S("Species"),
-    PC("Primitive Classification"),
+    UA("Unassignd"),
     A("ALL");
     private final String name;
 
     Taxon(String name){this.name = name;}
 
     public static Taxon fromString(String taxon){
-        if(taxon.isEmpty()){return Taxon.PC;}
+        if(taxon.isEmpty()){return Taxon.UA;}
         char temp = taxon.charAt(0);
         String input = Character.toString(temp);
         switch (input){
@@ -33,7 +37,7 @@ public enum Taxon {
             case "G": return Taxon.G;
             case "S": return Taxon.S;
             case "A": return Taxon.A;
-            case "1": return Taxon.PC; //TODO ander fiks?
+            case "1": return Taxon.UA;
             default: throw new IllegalArgumentException("Unknown taxon: " + taxon+" end");
         }
     }

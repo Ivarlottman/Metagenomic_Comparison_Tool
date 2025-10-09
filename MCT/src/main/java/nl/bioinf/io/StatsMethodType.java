@@ -1,5 +1,9 @@
 package nl.bioinf.io;
-
+/**
+ * text
+ * @author Ivar Lottman
+ * @version 0
+ * */
 public enum StatsMethodType {
     MEAN("Differences in groups wil be calculated with the group average"),
     MEDIAN("Differences in groups wil be calculated with the group meadian");

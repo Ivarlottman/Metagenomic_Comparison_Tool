@@ -1,6 +1,11 @@
 package nl.bioinf.io;
-
+/**
+ * text
+ * @author Ivar Lottman
+ * @version 0
+ * */
 public enum AnalysisType {
+
     NUMBER("Changes between groups will be expressed between the count diffrance number"),
     PERCENTAGE("Changes between groups will be expressed in the percentage of the count diffrance");
 

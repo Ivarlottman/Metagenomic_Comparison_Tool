@@ -1,5 +1,9 @@
 package nl.bioinf.io;
-
+/**
+ * text
+ * @author Ivar Lottman
+ * @version 0
+ * */
 public enum CountType {
     ALL("All, descrip= fragment counts covered by chosen clade"),
     DIRECT("The direct fragment counts covered by chosen clade");

@@ -1,15 +1,12 @@
-package nl.bioinf.DataManagement;
+package nl.bioinf.data_management;
 
-import nl.bioinf.io.StatsMethodType;
 import nl.bioinf.io.Taxon;
-import nl.bioinf.DataManagement.TaxonCount;
 import org.junit.jupiter.api.Test;
 
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import org.junit.jupiter.api.Assertions.*;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 
