@@ -1,1 +1,2 @@
 /home/ivar-lottman/Desktop/bioinformatica/jaar_3/java_ap/Metagenomic_Comparison_Tool/Recources/SRDP30.kreport
+/home/ivar-lottman/Desktop/bioinformatica/jaar_3/java_ap/Metagenomic_Comparison_Tool/Recources/SRDP31.kreport

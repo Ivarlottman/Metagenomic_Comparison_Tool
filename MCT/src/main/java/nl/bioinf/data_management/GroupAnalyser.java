@@ -8,7 +8,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+
+import static nl.bioinf.data_management.SampleGroup.makeNewKeyValue;
+import static nl.bioinf.data_management.SampleGroup.replaceWithNewKeyValue;
 
 public class GroupAnalyser {
     /**
@@ -34,8 +38,6 @@ public class GroupAnalyser {
             SampleGroup group = new SampleGroup(groupReader(groupPaths[i]),groupName,
                     statmethod, countType, taxonLevel);
             sampleGroups.add(group);
-            
-
         }
 
     }
@@ -50,7 +52,6 @@ public class GroupAnalyser {
                 if (line.isEmpty()) {continue;}
 
                 Path p = Paths.get(line);
-                System.out.println(p);
                 if(Files.isReadable(p)){paths.add(p);}
                 else throw new IOException("File not readable "+line);
             }
@@ -60,7 +61,32 @@ public class GroupAnalyser {
         return paths;
     }
 
-    private void doStatistics(){}
+
+    public void doStatistics(){
+
+        HashMap<NameAndGenus, List<Integer>> jointDataFrame = new HashMap<>();
+
+        for (int i = 0; i < sampleGroups.size(); i++ ){
+            SampleGroup sampleCurrentGroup = sampleGroups.get(i);
+            HashMap<NameAndGenus, Integer> currentHashMap = sampleCurrentGroup.groupStatframe;
+
+            for (NameAndGenus j : currentHashMap.keySet()) {
+                int keyvalue = currentHashMap.get(j);
+                if (!jointDataFrame.containsKey(j)){
+                    makeNewKeyValue(i, keyvalue, jointDataFrame, j);
+                }else {
+                    replaceWithNewKeyValue(jointDataFrame, j, i, keyvalue);
+                }
+            }
+        }
+        for(List<Integer> currentValues : jointDataFrame.values()){
+            if(currentValues.size() < sampleGroups.size()){
+                int arrydif = sampleGroups.size()-currentValues.size();
+                for(int k = 0; k < arrydif; k++){currentValues.add(0);}
+            }
+        }
+        
+    }
     private void printStatistics(){
         nl.bioinf.io.FileWriter x = new FileWriter();
     }

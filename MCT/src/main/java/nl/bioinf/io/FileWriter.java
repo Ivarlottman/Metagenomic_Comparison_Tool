@@ -1,6 +1,9 @@
 package nl.bioinf.io;
 
-import nl.bioinf.data_management.TaxonCount;
+import nl.bioinf.data_management.NameAndGenus;
+
+import java.util.HashMap;
+import java.util.List;
 
 public class FileWriter {
     /**
@@ -8,7 +11,11 @@ public class FileWriter {
      * @author Ivar Lottman
      * @version 0
      * */
-    String header;
-    TaxonCount[] body;
+    String[] header;
+    HashMap<NameAndGenus, List<Integer>> body;
 
+
+    public void printDataFrame(){}
+    public void printTopTen(){}
 }
+

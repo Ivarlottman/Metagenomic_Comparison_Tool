@@ -18,7 +18,8 @@ public class SampleGroup {
     String groupName;
     StatsMethodType applyStatsMethod;
     List<Path> samplePaths;
-    HashMap<NameAndGenus, List<Integer>> dataframe;
+    HashMap<NameAndGenus, List<Integer>> groupDataframe;
+    HashMap<NameAndGenus, Integer> groupStatframe;
 
     public SampleGroup(List<Path> samplePaths, String groupName,
                        StatsMethodType applyStatsMethod, CountType countType,  Taxon taxon) {
@@ -27,14 +28,38 @@ public class SampleGroup {
         this.applyStatsMethod = applyStatsMethod;
         this.samplePaths = samplePaths;
         this.samples = new ArrayList<>();
-        //System.out.println(samplePaths+"pathlist");
+
         for (int i = 0; i < samplePaths.size(); i++) {
             Path samplePath = samplePaths.get(i);
-
             FileReader newSampleReader = new FileReader(samplePath, countType, taxon);
             samples.add(newSampleReader.getSample());
         }
-        this.dataframe = createDataFrame();
+        this.groupDataframe = createDataFrame();
+        this.groupStatframe = extractStatFrame();
+    }
+
+    private HashMap<NameAndGenus, Integer> extractStatFrame() {
+        HashMap<NameAndGenus, Integer> groupStatframe = new HashMap<>();
+
+        //TODO try catch
+        for (NameAndGenus i : groupDataframe.keySet()) {
+            if(applyStatsMethod == StatsMethodType.MEAN) {
+                int sum = 0;
+                int len = groupDataframe.get(i).size();
+                for (int j = 0; j < len; j++) {
+                    //sum += groupDataframe.get(i).get(j);
+                    sum = Math.addExact(sum, groupDataframe.get(i).get(j));
+                }
+                int mean = sum / len;
+                groupStatframe.put(i, mean);
+            }
+            else if(applyStatsMethod == StatsMethodType.MEDIAN){
+                int len = groupDataframe.get(i).size()/2;
+                int median = groupDataframe.get(i).get(len);
+                groupStatframe.put(i, median);
+            }
+        }
+        return groupStatframe;
     }
 
 
@@ -69,7 +94,7 @@ public class SampleGroup {
         return  dataframe;
     }
 
-    private static void replaceWithNewKeyValue(HashMap<NameAndGenus, List<Integer>> dataframe, NameAndGenus nameAndGenus, int i, Integer keyvalue) {
+    static void replaceWithNewKeyValue(HashMap<NameAndGenus, List<Integer>> dataframe, NameAndGenus nameAndGenus, int i, Integer keyvalue) {
         List<Integer> tempArray = dataframe.get(nameAndGenus);
         if (tempArray.size()-1 == i){
             // append value to existing key
@@ -86,7 +111,7 @@ public class SampleGroup {
         }
     }
 
-    private static void makeNewKeyValue(int i, Integer keyvalue, HashMap<NameAndGenus, List<Integer>> dataframe, NameAndGenus nameAndGenus) {
+    static void makeNewKeyValue(int i, Integer keyvalue, HashMap<NameAndGenus, List<Integer>> dataframe, NameAndGenus nameAndGenus) {
         if(i == 0){
             // New key value
             ArrayList<Integer> emptyarraylist = new ArrayList<>();
