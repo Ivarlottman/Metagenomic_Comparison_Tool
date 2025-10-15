@@ -14,17 +14,16 @@ import java.util.List;
 import static nl.bioinf.data_management.SampleGroup.makeNewKeyValue;
 import static nl.bioinf.data_management.SampleGroup.replaceWithNewKeyValue;
 
+/**
+ * @author Ivar Lottman
+ * @version 0
+ */
 public class GroupAnalyser {
-    /**
-     * text
-     * @author Ivar Lottman
-     * @version 0
-     * */
-    Path[] groupPaths;
-    //List<String> groupNames;
-    List<SampleGroup> sampleGroups;
-    //List<ConfigGroup> configGroups;
 
+    Path[] groupPaths;
+    List<SampleGroup> sampleGroups;
+    AnalysisType analysisType;
+    int minAbundanceCount;
 
     public GroupAnalyser(Path[] groupPaths, StatsMethodType statmethod,
                          AnalysisType analysisType, Taxon taxonLevel,
@@ -32,6 +31,9 @@ public class GroupAnalyser {
 
         this.groupPaths = groupPaths;
         this.sampleGroups = new ArrayList<>();
+        this.analysisType = analysisType;
+        this.minAbundanceCount = minAbundanceCount;
+
         // TODO bespreek met michiel of het nog nodig is om een group record te maken
         for (int i = 0; i < groupPaths.length; i++ ){
             String groupName = groupPaths[i].getFileName().toString();
@@ -64,8 +66,55 @@ public class GroupAnalyser {
 
     public void doStatistics(){
 
-        HashMap<NameAndGenus, List<Integer>> jointDataFrame = new HashMap<>();
+        HashMap<NameAndGenus, List<Integer>> jointDataFrame = mergeSampleGroupData();
 
+        filterLowAbundences(jointDataFrame);
+
+        correctHashmapValueLength(jointDataFrame, sampleGroups.size());
+
+        HashMap<NameAndGenus, List<Integer>> groupDiffranceDataFrame = new HashMap<>();
+        for (NameAndGenus i : jointDataFrame.keySet()){
+            int startPosition = 0;
+            List<Integer> currentList = jointDataFrame.get(i);
+            List<Integer> tempArray = new ArrayList<>();
+            for (int endPosition = 1; endPosition < currentList.size(); endPosition++){
+                int startValue = currentList.get(startPosition);
+                int endValue = currentList.get(endPosition);
+                int diffranceInGroupAbundance = analysisType.calculateDifferenceByAnalysisType(startValue, endValue);
+                tempArray.add(diffranceInGroupAbundance);
+                startPosition++;
+
+            }
+            groupDiffranceDataFrame.put(i,tempArray);
+        }
+    }
+
+    static void correctHashmapValueLength(HashMap<NameAndGenus, List<Integer>> jointDataFrame, int size) {
+        for(List<Integer> currentValues : jointDataFrame.values()){
+            if(currentValues.size() < size){
+                int arrydif = size -currentValues.size();
+                for(int k = 0; k < arrydif; k++){currentValues.add(0);}
+            }
+        }
+    }
+
+    private void filterLowAbundences(HashMap<NameAndGenus, List<Integer>> jointDataFrame) {
+        List<NameAndGenus> removalList = new ArrayList<>();
+        for(NameAndGenus x : jointDataFrame.keySet()){
+            List<Integer> currentList = jointDataFrame.get(x);
+            int count = 0;
+            for(int i =0; i < currentList.size();i++){
+                int currentValue = currentList.get(i);
+                if (currentValue <= minAbundanceCount){ count++;}
+            }
+            if (count == currentList.size()){removalList.add(x);}
+        }
+        for(int y = 0; y < removalList.size(); y++){
+            jointDataFrame.remove(removalList.get(y));}
+    }
+
+    private HashMap<NameAndGenus, List<Integer>> mergeSampleGroupData() {
+        HashMap<NameAndGenus, List<Integer>> jointDataFrame = new HashMap<>();
         for (int i = 0; i < sampleGroups.size(); i++ ){
             SampleGroup sampleCurrentGroup = sampleGroups.get(i);
             HashMap<NameAndGenus, Integer> currentHashMap = sampleCurrentGroup.groupStatframe;
@@ -79,14 +128,9 @@ public class GroupAnalyser {
                 }
             }
         }
-        for(List<Integer> currentValues : jointDataFrame.values()){
-            if(currentValues.size() < sampleGroups.size()){
-                int arrydif = sampleGroups.size()-currentValues.size();
-                for(int k = 0; k < arrydif; k++){currentValues.add(0);}
-            }
-        }
-        
+        return jointDataFrame;
     }
+
     private void printStatistics(){
         nl.bioinf.io.FileWriter x = new FileWriter();
     }
