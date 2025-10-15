@@ -43,21 +43,9 @@ public class SampleGroup {
 
         //TODO try catch
         for (NameAndGenus i : groupDataframe.keySet()) {
-            if(applyStatsMethod == StatsMethodType.MEAN) {
-                int sum = 0;
-                int len = groupDataframe.get(i).size();
-                for (int j = 0; j < len; j++) {
-                    //sum += groupDataframe.get(i).get(j);
-                    sum = Math.addExact(sum, groupDataframe.get(i).get(j));
-                }
-                int mean = sum / len;
-                groupStatframe.put(i, mean);
-            }
-            else if(applyStatsMethod == StatsMethodType.MEDIAN){
-                int len = groupDataframe.get(i).size()/2;
-                int median = groupDataframe.get(i).get(len);
-                groupStatframe.put(i, median);
-            }
+            List<Integer> currentList = groupDataframe.get(i);
+            int statResult = applyStatsMethod.calculateByStatMethod(currentList);
+            groupStatframe.put(i, statResult);
         }
         return groupStatframe;
     }
