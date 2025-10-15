@@ -18,6 +18,16 @@ public enum AnalysisType {
         case "PERCENTAGE":return AnalysisType.PERCENTAGE;
         default: throw new IllegalArgumentException("Unknown AnalysisType: " + description);}
     }
+
+    public int calculateDifferenceByAnalysisType(int countOne, int countTwo) {
+        int result = 0;
+
+        if (this == NUMBER){result = countOne-countTwo;}
+        else if (this == PERCENTAGE){result = countOne/countTwo*100;};
+
+        return result;
+    }
+
     @Override
     public String toString() {return AnalysisTypeDescription;}
 }
