@@ -18,6 +18,7 @@ public class SampleGroup {
     String groupName;
     StatsMethodType applyStatsMethod;
     List<Path> samplePaths;
+    List<String> sampleNames;
     HashMap<NameAndGenus, List<Integer>> groupDataframe;
     HashMap<NameAndGenus, Integer> groupStatframe;
 
@@ -28,11 +29,12 @@ public class SampleGroup {
         this.applyStatsMethod = applyStatsMethod;
         this.samplePaths = samplePaths;
         this.samples = new ArrayList<>();
-
+        this.sampleNames = new ArrayList<>();
         for (int i = 0; i < samplePaths.size(); i++) {
             Path samplePath = samplePaths.get(i);
             FileReader newSampleReader = new FileReader(samplePath, countType, taxon);
             samples.add(newSampleReader.getSample());
+            sampleNames.add(newSampleReader.getSample().sampleName());
         }
         this.groupDataframe = createDataFrame();
         this.groupStatframe = extractStatFrame();
@@ -73,12 +75,7 @@ public class SampleGroup {
             }
         }
         // Post loop correction
-        for(List<Integer> currentValues : dataframe.values()){
-            if(currentValues.size() < samples.size()){
-                int arrydif = samples.size()-currentValues.size();
-                for(int k = 0; k < arrydif; k++){currentValues.add(0);}
-            }
-        }
+        GroupAnalyser.correctHashmapValueLength(dataframe, samples.size());
         return  dataframe;
     }
 
