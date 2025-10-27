@@ -23,14 +23,16 @@ public class GroupAnalyser {
     AnalysisType analysisType;
     int minAbundanceCount;
     List<String> groupNames;
+    String outputFile;
 
     public GroupAnalyser(Path[] groupPaths, StatsMethodType statmethod,
                          AnalysisType analysisType, Taxon taxonLevel,
-                         CountType countType, int minAbundanceCount) {
+                         CountType countType, int minAbundanceCount, String outputFile) {
 
         this.groupPaths = groupPaths;
         this.sampleGroups = new ArrayList<>();
         this.groupNames = new ArrayList<>();
+        this.outputFile = outputFile;
 
         this.analysisType = analysisType;
         this.minAbundanceCount = minAbundanceCount;
@@ -87,6 +89,7 @@ public class GroupAnalyser {
             groupDifferanceColNames.add(newString.toString());
         }
         getTopTen(groupDiffranceDataFrame);
+        System.out.println(groupDiffranceDataFrame);
         
     }
 
@@ -188,6 +191,7 @@ public class GroupAnalyser {
             List<Integer> currentValues = dataFrame.get(currentNameAndGenus);
             topTenSortedHashMap.put(currentNameAndGenus, currentValues);
         }
+        System.out.println(topTenSortedHashMap);
 
     }
 

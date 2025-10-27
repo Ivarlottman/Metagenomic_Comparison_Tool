@@ -75,7 +75,7 @@ public class CommandLineParser implements Runnable {
         Path[] placeholder = {configPathOne, configPathTwo};
 
         GroupAnalyser analyserObject = new GroupAnalyser(placeholder,
-                methodType, analysisType, taxonLevel, countType, minAbundanceCount);
+                methodType, analysisType, taxonLevel, countType, minAbundanceCount, outputFile);
         analyserObject.doStatistics();
     }
 }

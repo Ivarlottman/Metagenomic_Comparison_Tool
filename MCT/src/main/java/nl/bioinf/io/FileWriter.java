@@ -15,7 +15,7 @@ public class FileWriter {
     HashMap<NameAndGenus, List<Integer>> body;
 
 
+
     public void printDataFrame(){}
-    public void printTopTen(){}
 }
 
