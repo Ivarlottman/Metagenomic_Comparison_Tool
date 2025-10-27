@@ -36,7 +36,8 @@ public enum StatsMethodType {
             result = mean;
         }
         else if(this == MEDIAN){
-
+            int median = inputList .size()/2;
+            result = median;
         }
 
         return result;
