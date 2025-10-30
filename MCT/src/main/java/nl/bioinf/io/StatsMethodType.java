@@ -9,7 +9,16 @@ import java.util.List;
  * */
 public enum StatsMethodType {
     MEAN("Differences in groups wil be calculated with the group average"),
-    MEDIAN("Differences in groups wil be calculated with the group meadian");
+    MEDIAN("Differences in groups wil be calculated with the group meadian"){
+        @Override
+        public int calculateByStatMethod(List<Integer> inputList) {
+            int result = 0;
+            int median = inputList.size()/2;
+            result = median;
+            return result;
+        }
+    };
+
 
     private final String statsMethodTypeDescription;
     StatsMethodType(String statsMethodTypeDescription) {
@@ -26,20 +35,13 @@ public enum StatsMethodType {
 
     public int calculateByStatMethod(List<Integer> inputList){
         int result = 0;
-        if(this == MEAN){
-            int sum = 0;
-            int len = inputList.size();
-            for (int j = 0; j < len; j++) {
-                sum = Math.addExact(sum, inputList.get(j));
+        int sum = 0;
+        int len = inputList.size();
+        for (int j = 0; j < len; j++) {
+            sum = Math.addExact(sum, inputList.get(j));
             }
-            int mean = sum / len;
-            result = mean;
-        }
-        else if(this == MEDIAN){
-            int median = inputList .size()/2;
-            result = median;
-        }
-
+        int mean = sum / len;
+        result = mean;
         return result;
     }
 
