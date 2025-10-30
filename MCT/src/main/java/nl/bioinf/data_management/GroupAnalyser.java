@@ -3,6 +3,7 @@ package nl.bioinf.data_management;
 import nl.bioinf.io.*;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -18,12 +19,13 @@ import static nl.bioinf.data_management.SampleGroup.replaceWithNewKeyValue;
  */
 public class GroupAnalyser {
 
-    Path[] groupPaths;
-    List<SampleGroup> sampleGroups;
-    AnalysisType analysisType;
-    int minAbundanceCount;
-    List<String> groupNames;
-    String outputFile;
+    private Path[] groupPaths;
+    private List<SampleGroup> sampleGroups;
+    private AnalysisType analysisType;
+    private int minAbundanceCount;
+    private List<String> groupNames;
+    private String outputFile;
+    private File resultFolder;
 
     public GroupAnalyser(Path[] groupPaths, StatsMethodType statmethod,
                          AnalysisType analysisType, Taxon taxonLevel,
@@ -36,6 +38,13 @@ public class GroupAnalyser {
 
         this.analysisType = analysisType;
         this.minAbundanceCount = minAbundanceCount;
+
+        //TODO add init mehtod
+        Path outputPath = Paths.get(outputFile);
+        String outputAbsoluteStringPath = outputPath.toAbsolutePath().toString();
+        File resultFolder = new File(outputAbsoluteStringPath+"_result","Dataframes");
+        resultFolder.mkdirs();
+        this.resultFolder = resultFolder;
 
         for (int i = 0; i < groupPaths.length; i++ ){
             String groupName = groupPaths[i].getFileName().toString();
@@ -77,6 +86,15 @@ public class GroupAnalyser {
 
         HashMap<NameAndGenus, List<Integer>> groupDiffranceDataFrame = calculateGroupDiffrence(jointDataFrame);
 
+        List<String> groupDifferanceColNames = getGroupDifferanceColNames();
+
+        HashMap<NameAndGenus,List<Integer>> topTenDataFrame = getTopTen(groupDiffranceDataFrame);
+
+        printStatistics(groupDifferanceColNames, groupDiffranceDataFrame, topTenDataFrame, sampleGroups);
+        
+    }
+
+    private List<String> getGroupDifferanceColNames() {
         List<String> groupDifferanceColNames = new ArrayList<>();
         int startPosition = 0;
         for (int endPosition = 1; endPosition < sampleGroups.size(); endPosition++){
@@ -88,9 +106,7 @@ public class GroupAnalyser {
             newString.append(endString);
             groupDifferanceColNames.add(newString.toString());
         }
-        getTopTen(groupDiffranceDataFrame);
-        System.out.println(groupDiffranceDataFrame);
-        
+        return groupDifferanceColNames;
     }
 
     private HashMap<NameAndGenus, List<Integer>> calculateGroupDiffrence(HashMap<NameAndGenus, List<Integer>> jointDataFrame) {
@@ -141,7 +157,7 @@ public class GroupAnalyser {
         HashMap<NameAndGenus, List<Integer>> jointDataFrame = new HashMap<>();
         for (int i = 0; i < sampleGroups.size(); i++ ){
             SampleGroup sampleCurrentGroup = sampleGroups.get(i);
-            HashMap<NameAndGenus, Integer> currentHashMap = sampleCurrentGroup.groupStatframe;
+            HashMap<NameAndGenus, Integer> currentHashMap = sampleCurrentGroup.getGroupStatframe();
 
             for (NameAndGenus j : currentHashMap.keySet()) {
                 int keyvalue = currentHashMap.get(j);
@@ -170,14 +186,11 @@ public class GroupAnalyser {
         return result;
     }
 
-    private void getTopTen(HashMap<NameAndGenus, List<Integer>> dataFrame){
-
+    private HashMap<NameAndGenus, List<Integer>> getTopTen(HashMap<NameAndGenus, List<Integer>> dataFrame){
         HashMap<NameAndGenus, Integer> unsortedHashMap = new HashMap<>();
-        for (NameAndGenus i : dataFrame.keySet()) {
-            List<Integer> currentList = dataFrame.get(i);
-            Integer absoluteValue = getAbsoluteValue(currentList);
-            unsortedHashMap.put(i, absoluteValue);
-            }
+        for ( Map.Entry<NameAndGenus, List<Integer>> entry: dataFrame.entrySet()){
+            unsortedHashMap.put(entry.getKey(),getAbsoluteValue(entry.getValue()));
+        }
 
         List<Map.Entry<NameAndGenus, Integer>> sortingList = new ArrayList<>(unsortedHashMap.entrySet());
         sortingList.sort(Map.Entry.comparingByValue());
@@ -191,12 +204,28 @@ public class GroupAnalyser {
             List<Integer> currentValues = dataFrame.get(currentNameAndGenus);
             topTenSortedHashMap.put(currentNameAndGenus, currentValues);
         }
-        System.out.println(topTenSortedHashMap);
-
+        return topTenSortedHashMap;
     }
 
-    private void printStatistics(){
-        nl.bioinf.io.FileWriter x = new FileWriter();
+    private void printStatistics(List<String> compareColNames, HashMap<NameAndGenus, List<Integer>> compareHashmap,
+                                 HashMap<NameAndGenus, List<Integer>> topTenSortedHashMap, List<SampleGroup> sampleGroups) {
+
+        String topTenFileName = "TopTen";
+        MtcFileWriter topTenFileWriter = new MtcFileWriter(compareColNames,topTenSortedHashMap, resultFolder, topTenFileName);
+        topTenFileWriter.printDataFrame();
+
+        String compareFileName = "GroupComparison";
+        MtcFileWriter compareFileWriter = new MtcFileWriter(compareColNames,compareHashmap,resultFolder, compareFileName);
+        compareFileWriter.printDataFrame();
+
+        for  (SampleGroup sampleGroup : sampleGroups) {
+            String fileName = sampleGroup.getGroupName();
+            List<String> colNames = sampleGroup.getSampleNames();
+            HashMap<NameAndGenus,List<Integer>> dataFrame = sampleGroup.getGroupDataframe();
+            MtcFileWriter sampleFileWriter = new MtcFileWriter(colNames,dataFrame,resultFolder,fileName);
+            sampleFileWriter.printDataFrame();
+        }
+
     }
 
 
