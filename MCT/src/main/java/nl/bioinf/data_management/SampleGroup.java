@@ -4,6 +4,7 @@ import nl.bioinf.io.*;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -14,13 +15,13 @@ public class SampleGroup {
      * @version 0
      * */
 
-    List<Sample> samples;
-    String groupName;
-    StatsMethodType applyStatsMethod;
-    List<Path> samplePaths;
-    List<String> sampleNames;
-    HashMap<NameAndGenus, List<Integer>> groupDataframe;
-    HashMap<NameAndGenus, Integer> groupStatframe;
+    private List<Sample> samples;
+    private String groupName;
+    private StatsMethodType applyStatsMethod;
+    private List<Path> samplePaths;
+    private List<String> sampleNames;
+    private HashMap<NameAndGenus, List<Integer>> groupDataframe;
+    private HashMap<NameAndGenus, Integer> groupStatframe;
 
     public SampleGroup(List<Path> samplePaths, String groupName,
                        StatsMethodType applyStatsMethod, CountType countType,  Taxon taxon) {
@@ -113,10 +114,22 @@ public class SampleGroup {
         }
     }
 
-
-    private void printGroupResults(){
-        nl.bioinf.io.FileWriter x = new FileWriter();
+    public HashMap<NameAndGenus, Integer> getGroupStatframe() {
+            HashMap<NameAndGenus, Integer> returndGroupStatframe = groupStatframe;
+        return returndGroupStatframe;
     }
 
-    //public HashMap<NameAndGenus, List<Integer>> getDataframe() {return dataframe;}
+    public HashMap<NameAndGenus, List<Integer>> getGroupDataframe() {
+        HashMap<NameAndGenus, List<Integer>> returndGroupDataframe = groupDataframe;
+        return returndGroupDataframe;
+    }
+
+    public String getGroupName() {
+        String returnString = groupName;
+        return returnString;
+    }
+    public List<String> getSampleNames() {
+        List<String> returnSampleNames = sampleNames;
+        return returnSampleNames;
+    }
 }
