@@ -19,6 +19,9 @@ import java.util.List;
 //System.out.println(splitLine[5]+" pos5 name");
 
 
+/**
+ *
+ */
 public class FileReader {
     /**
      * @author Ivar Lottman
@@ -27,10 +30,10 @@ public class FileReader {
      * A TaconCount record containing an abundancie count, taxon enum and a sientific name.
      * */
 
-    Sample sample;
-    Path samplePath;
-    Taxon taxonLevel;
-    CountType countType;
+    private Sample sample;
+    private Path samplePath;
+    private Taxon taxonLevel;
+    private CountType countType;
 
 
     public FileReader(Path inputSamplePath, CountType countType, Taxon taxonLevel) {
