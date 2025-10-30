@@ -21,7 +21,9 @@ java 24
 In het geval van het gebruik van een IDE open de MCT folder en niet de repo
 
 ## User guide  
+```
 jar (configfile1) (configfile2) (optie ...)(optie..)
+```
 in de deze config files moeten de filepaths naar de krepport samples staan 
 
 
