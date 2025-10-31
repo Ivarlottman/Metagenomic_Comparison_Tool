@@ -8,12 +8,12 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
+/**
+ * @author Ivar Lottman
+ * @version 1
+ * This class builds a sample group based on the samplepaths provided
+ */
 public class SampleGroup {
-    /**
-     * text
-     * @author Ivar Lottman
-     * @version 0
-     * */
 
     private List<Sample> samples;
     private String groupName;
@@ -41,6 +41,11 @@ public class SampleGroup {
         this.groupStatframe = extractStatFrame();
     }
 
+    /**
+     * param Hashmap NameAndGenus List Integer
+     * @return Hashmap NameAndGenus, int
+     * This method Makes a new NameAndGenus int hashmap with the applyStatMehtod enum
+     */
     private HashMap<NameAndGenus, Integer> extractStatFrame() {
         HashMap<NameAndGenus, Integer> groupStatframe = new HashMap<>();
 
@@ -54,6 +59,13 @@ public class SampleGroup {
     }
 
 
+    /**
+     * param Samples List of samples
+     * @return Hashmap NameAndGenus, List integer
+     * This method creates a NameAndGenus record, List integer hashmap that for each sample adds the abundance value
+     * to the list per NameAndGenus record which consists of String Name and Taxon texonlevel
+     * if a NameAndGenus does not exist in a sample a 0 will be added in its place in the integer list
+     */
     private HashMap<NameAndGenus, List<Integer>> createDataFrame(){
 
         HashMap<NameAndGenus, List<Integer>> dataframe = new HashMap<>();
@@ -80,6 +92,15 @@ public class SampleGroup {
         return  dataframe;
     }
 
+    /**
+     * @param dataframe  Hashmap NameAndGenus
+     * @param nameAndGenus NameAndGenus record
+     * @param i int sample index
+     * @param keyvalue int abundance to be added
+     * This method replaces the value of a NameAndGenus in the dataframe hashmap with an updated list of integers
+     * if the sample index is one larger than the value list the keyvalue gets added and if the index is larger than one
+     * 0 values get added till the abundance key value takes up the last space.
+     */
     static void replaceWithNewKeyValue(HashMap<NameAndGenus, List<Integer>> dataframe, NameAndGenus nameAndGenus, int i, Integer keyvalue) {
         List<Integer> tempArray = dataframe.get(nameAndGenus);
         if (tempArray.size()-1 == i){
@@ -87,7 +108,7 @@ public class SampleGroup {
             tempArray.add(keyvalue);
             dataframe.put(nameAndGenus,tempArray);
         }else if (tempArray.size()-1 < i){
-            // append value based on missing lengt
+            // append value based on missing length
             int arraydif = i -tempArray.size();
             for(int k = 0; k < arraydif; k++){
                 tempArray.add(0);
@@ -97,6 +118,15 @@ public class SampleGroup {
         }
     }
 
+    /**
+     * @param i int sample index
+     * @param keyvalue int abundance to be added to the list
+     * @param dataframe Hashmap NameAndGenus to be added to
+     * @param nameAndGenus NameAndGenus Record to be added to the hashmap
+     * This method makes adds a new Key Value to the dataframe hashmap based on the index of the sample loop
+     * if this is the first loop a new array is made and is put in with the NameAndGenus key and if not it adds 0 value
+     * to the array until the abundance value can be placed in the last spot of the index
+     */
     static void makeNewKeyValue(int i, Integer keyvalue, HashMap<NameAndGenus, List<Integer>> dataframe, NameAndGenus nameAndGenus) {
         if(i == 0){
             // New key value

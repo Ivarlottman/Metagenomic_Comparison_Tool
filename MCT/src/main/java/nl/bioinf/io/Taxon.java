@@ -1,8 +1,8 @@
 package nl.bioinf.io;
 /**
- * text
  * @author Ivar Lottman
- * @version 0
+ * @version 1
+ * This class determents the taxon value and which get written in the sample object during file reading
  * */
 public enum Taxon {
     U("Unclassified"),

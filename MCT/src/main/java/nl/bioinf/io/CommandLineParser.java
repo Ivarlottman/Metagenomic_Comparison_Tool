@@ -7,21 +7,19 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+/**
+ * @author Ivar Lottman
+ * @version 1
+ * This is the command line parser class that handles the commandline input and passes it into the GroupAnalyser
+ * Controller class which then preforms the functionality of this tool
+ */
 @Command(name = "CommandLineParser")
 public class CommandLineParser implements Runnable {
-    /**
-     * Java documentation style class lvl
-     * located in /build/libs
-     * testcommand
-     * java -jar MTC-1.0-SNAPSHOT-all.jar /home/ivar-lottman/Desktop/bioinformatica/jaar_3/java_ap/Metagenomic_Comparison_Tool/Recources/config_1.txt /home/ivar-lottman/Desktop/bioinformatica/jaar_3/java_ap/Metagenomic_Comparison_Tool/Recources/config_2.txt
-     *
-     * @author Ivar
-     * @version 0
-     * */
+
     @Option(names = {"-o", "-output"}, description = "output file, Default value: ${DEFAULT-VALUE}")
     String outputFile = System.getProperty("user.dir");
 
-    @Option(names = {"-m", "method-type"}, description = "Method to be used in analysis: Mean or Median." +
+    @Option(names = {"-m", "-method-type"}, description = "Method to be used in analysis: Mean or Median." +
             "Default value: ${DEFAULT-VALUE}")
     StatsMethodType methodType = StatsMethodType.MEAN;
 
@@ -57,6 +55,10 @@ public class CommandLineParser implements Runnable {
                 else throw new IllegalArgumentException("ouptput path is not readable");
     }
 
+    /**
+     * This method Runs the commandline parser and validates the filepaths and then passes all the options into the
+     * GroupAnalyser controller class
+     */
     @Override
     public void run() {
         System.out.println("Running command line parser");

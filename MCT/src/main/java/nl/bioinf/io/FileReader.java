@@ -10,26 +10,13 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
-// placeholder locations in data
-//System.out.println(splitLine[0]+" pos0 to root");
-//System.out.println(splitLine[1]+" pos1 clade all");
-//System.out.println(splitLine[2]+" pos2 clade direct");
-//System.out.println(splitLine[3]+" pos3 taxon");
-//System.out.println(splitLine[4]+" pos4 id");
-//System.out.println(splitLine[5]+" pos5 name");
-
-
 /**
- *
+ * @author Ivar Lottman
+ * @version 1
+ * This class reads in a krapport file and builds a Sample object out of it
+ * The sample object is made based on the Taxon and countType enum provided
  */
 public class FileReader {
-    /**
-     * @author Ivar Lottman
-     * @version 0
-     * This class reads in the kraport file from the kraken2 tool and puts it into a Sample record with
-     * A TaconCount record containing an abundancie count, taxon enum and a sientific name.
-     * */
-
     private Sample sample;
     private Path samplePath;
     private Taxon taxonLevel;
@@ -43,20 +30,21 @@ public class FileReader {
         this.sample = readSample();
 
     }
+
+    /**
+     * @return newSample Sample Record object
+     * param SamplePath Path filepath
+     * param taxonLevel Taxon Enum
+     * param countType CountType Enum
+     * This method reads in the sample file with the path provided.
+     * It makes a Sample object with the filename from the filepath and the List TaxonCount record from
+     * each entry in the krapport. The countType is determend by the countType enum which coresponds with the description
+     * of the enum and decides the type of abundance used in the TaxonCount. The taxonLevel enum decides which taxons will
+     * be put in if the value is All evry entry will be put in the taxonCount list otherwise only the specified TaxonValue
+     * will be appended in the TaxonCount list
+     */
     private Sample readSample(){
-        /**
-         * @author Ivar Lottman
-         * @version 0
-         * @param this.samplePath
-         * @param this.taxonLevel
-         * @param this.countType
-         * @return this.sample object
-         * This method uses the samplepath parameter in a Files.BufferdReader object to read in the file
-         * Based of the taxonLevel provided to this class it will make a selection of which taxons to put
-         * in the sample object, after which based on the countType provided it will add a taxon to the taxonlist
-         * of the sample object once the file is done reading the sample object can be retrieved by other classes.
-         *
-         */
+
         Sample newSample = new Sample("placeholder",new ArrayList<TaxonCount>());
         String sampleName = samplePath.getFileName().toString();
 
@@ -73,11 +61,11 @@ public class FileReader {
                 Taxon taxonValue = Taxon.fromString(splitLine[3]);
                 int count = 0;
 
-                // All path
+                // All taxon path
                 if (taxonLevel == Taxon.A){
                     addTaxon(count, splitLine, taxonValue, taxonCounts);
                 }
-                // Specific path
+                // Specific taxon path
                 else if (taxonLevel == taxonValue) {
                     addTaxon(count, splitLine, taxonValue, taxonCounts);
                 }else continue;
@@ -91,6 +79,13 @@ public class FileReader {
         return newSample;
     }
 
+    /**
+     * @param count Abundance count int
+     * @param splitLine Split String [Size=5]
+     * @param taxonValue Taxon enum
+     * @param taxonCounts List of taxonCount record
+     * This method adds a TaxonCount record to the TaxonCount list of a sample based on the CountType index
+     */
     private void addTaxon(int count, String[] splitLine, Taxon taxonValue, List<TaxonCount> taxonCounts) {
         if(countType == CountType.DIRECT){
             count = Integer.parseInt(splitLine[2]);
@@ -103,5 +98,7 @@ public class FileReader {
         taxonCounts.add(newTaxon);
     }
 
-    public Sample getSample() {return sample;}
+    public Sample getSample() {
+        Sample copySample = sample;
+        return copySample;}
 }

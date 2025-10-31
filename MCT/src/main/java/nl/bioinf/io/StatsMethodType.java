@@ -3,9 +3,9 @@ package nl.bioinf.io;
 import java.util.List;
 
 /**
- * text
  * @author Ivar Lottman
- * @version 0
+ * @version 1
+ * This Class decides which method gets used to compare groups
  * */
 public enum StatsMethodType {
     MEAN("Differences in groups wil be calculated with the group average"),
@@ -33,6 +33,11 @@ public enum StatsMethodType {
         }
     }
 
+    /**
+     * @param inputList List of Integers
+     * @return int result
+     * This method calculates the mean or median of the inputlist based on the enums value.
+     */
     public int calculateByStatMethod(List<Integer> inputList){
         int result = 0;
         int sum = 0;

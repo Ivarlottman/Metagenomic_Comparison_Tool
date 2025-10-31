@@ -20,6 +20,12 @@ public enum AnalysisType {
         default: throw new IllegalArgumentException("Unknown AnalysisType: " + description);}
     }
 
+    /**
+     * @param countOne Int first abundance value
+     * @param countTwo Int Second abundance value
+     * @return Int calculated number based on enum value
+     * Base implementation is countOne - countTwo
+     */
     public int calculateDifferenceByAnalysisType(int countOne, int countTwo) {
         return countOne - countTwo;
     }

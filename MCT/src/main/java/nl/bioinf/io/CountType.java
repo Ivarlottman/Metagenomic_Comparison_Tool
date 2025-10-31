@@ -1,8 +1,8 @@
 package nl.bioinf.io;
 /**
- * text
  * @author Ivar Lottman
- * @version 0
+ * @version 1
+ * This class determens which of the count types is used when reading in kraken2 files
  * */
 public enum CountType {
     ALL("All, descrip= fragment counts covered by chosen clade"),

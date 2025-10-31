@@ -15,7 +15,10 @@ import static nl.bioinf.data_management.SampleGroup.replaceWithNewKeyValue;
 
 /**
  * @author Ivar Lottman
- * @version 0
+ * @version 1
+ * This is the Controller Class of MCT and initiates the reading of the config files and the sample's that follows
+ * The functionality of this class is cald with .doStatistics which based on the input variables merges and
+ * writes the created csv's
  */
 public class GroupAnalyser {
 
@@ -35,17 +38,32 @@ public class GroupAnalyser {
         this.sampleGroups = new ArrayList<>();
         this.groupNames = new ArrayList<>();
         this.outputFile = outputFile;
-
         this.analysisType = analysisType;
         this.minAbundanceCount = minAbundanceCount;
+        init(groupPaths, statmethod, taxonLevel, countType, outputFile);
+    }
 
-        //TODO add init mehtod
+    /**
+     * Init of the GroupAnalyser constructor
+     * @param groupPaths list of Path
+     * @param statmethod StatsMethodType Enum
+     * @param taxonLevel Taxon Enum
+     * @param countType CountType Enum
+     * @param outputFile String Outputfile
+     * Init consists of 2 parts
+     * The first part creates the output folders based on the outputFile param
+     * The second part creates the sample group based on the amount of config files in the groupPaths param
+     * The Sample group objects will then be made based on the StatMethod TaxonLevel and CountType enum params given
+     */
+    private void init(Path[] groupPaths, StatsMethodType statmethod, Taxon taxonLevel, CountType countType, String outputFile) {
+        // Init result file object
         Path outputPath = Paths.get(outputFile);
         String outputAbsoluteStringPath = outputPath.toAbsolutePath().toString();
         File resultFolder = new File(outputAbsoluteStringPath+"_result","Dataframes");
         resultFolder.mkdirs();
         this.resultFolder = resultFolder;
 
+        // Init Sample group creation
         for (int i = 0; i < groupPaths.length; i++ ){
             String groupName = groupPaths[i].getFileName().toString();
             groupNames.add(groupName);
@@ -53,13 +71,17 @@ public class GroupAnalyser {
                     statmethod, countType, taxonLevel);
             sampleGroups.add(group);
         }
-
     }
 
 
-    private List<Path> groupReader(Path inputpath){
+    /**
+     * @param inputPath Path inputpath
+     * @return List of Paths
+     * This method reads a Config file and passes all the sample paths to a list which is returned
+     */
+    private List<Path> groupReader(Path inputPath){
         List<Path> paths = new ArrayList<>();
-        try(BufferedReader reader = Files.newBufferedReader(inputpath)) {
+        try(BufferedReader reader = Files.newBufferedReader(inputPath)) {
             String line;
             while ((line = reader.readLine()) != null) {
                 //TODO add other checks here
@@ -76,24 +98,35 @@ public class GroupAnalyser {
     }
 
 
+    /**
+     *The doStatistics method is structured as follows
+     * First it merges the Statframe of the samplegroup objects
+     * After which it filters based on the minamum abundence amount and corrects the hashmap lengt
+     * Based the Analysis type it wil then make a hashmap for the differences between the groups
+     * After that based on the Absolute value a top 10 will be extracted from the hashmap
+     * Lastly all the hashmaps get writen to csv
+     */
     public void doStatistics(){
 
         HashMap<NameAndGenus, List<Integer>> jointDataFrame = mergeSampleGroupData();
 
-        filterLowAbundences(jointDataFrame);
-
+        filterlowAbundences(jointDataFrame);
         correctHashmapValueLength(jointDataFrame, sampleGroups.size());
 
-        HashMap<NameAndGenus, List<Integer>> groupDiffranceDataFrame = calculateGroupDiffrence(jointDataFrame);
+        HashMap<NameAndGenus, List<Integer>> groupDifferanceDataFrame = calculateGroupDifferance(jointDataFrame);
 
         List<String> groupDifferanceColNames = getGroupDifferanceColNames();
 
-        HashMap<NameAndGenus,List<Integer>> topTenDataFrame = getTopTen(groupDiffranceDataFrame);
+        HashMap<NameAndGenus,List<Integer>> topTenDataFrame = getTopTen(groupDifferanceDataFrame);
 
-        printStatistics(groupDifferanceColNames, groupDiffranceDataFrame, topTenDataFrame, sampleGroups);
-        
+        printStatistics(groupDifferanceColNames, groupDifferanceDataFrame, topTenDataFrame, sampleGroups, jointDataFrame);
     }
 
+    /**
+     * @return list of strings
+     * Based on the sample group names it will make list of strings to match the group differance hashmap
+     * example GroupOne_V_GroupTwo
+     */
     private List<String> getGroupDifferanceColNames() {
         List<String> groupDifferanceColNames = new ArrayList<>();
         int startPosition = 0;
@@ -109,71 +142,99 @@ public class GroupAnalyser {
         return groupDifferanceColNames;
     }
 
-    private HashMap<NameAndGenus, List<Integer>> calculateGroupDiffrence(HashMap<NameAndGenus, List<Integer>> jointDataFrame) {
-        HashMap<NameAndGenus, List<Integer>> groupDiffranceDataFrame = new HashMap<>();
-        for (NameAndGenus i : jointDataFrame.keySet()){
+    /**
+     * @param jointDataFrame Hashmap< NameAndGenus record, List Integer>
+     * @return groupDifferanceDataFrame
+     * Based on the jointDataFrame hashmap this method makes a new hashmap comparing each group calculated with the
+     * AnalysisType Enum.
+     * The differences calculated are in order of the sample groups
+     */
+    private HashMap<NameAndGenus, List<Integer>> calculateGroupDifferance(HashMap<NameAndGenus, List<Integer>> jointDataFrame) {
+        HashMap<NameAndGenus, List<Integer>> groupDifferanceDataFrame = new HashMap<>();
+        for (NameAndGenus currentKey : jointDataFrame.keySet()){
             int startPosition = 0;
-            List<Integer> currentList = jointDataFrame.get(i);
+            List<Integer> currentList = jointDataFrame.get(currentKey);
             List<Integer> tempArray = new ArrayList<>();
+            // Adds an int based on the differance of group(i) and group(j)
             for (int endPosition = 1; endPosition < currentList.size(); endPosition++){
                 int startValue = currentList.get(startPosition);
                 int endValue = currentList.get(endPosition);
                 int differenceInGroupAbundance = analysisType.calculateDifferenceByAnalysisType(startValue, endValue);
                 tempArray.add(differenceInGroupAbundance);
                 startPosition++;
-
             }
-            groupDiffranceDataFrame.put(i,tempArray);
-
+            groupDifferanceDataFrame.put(currentKey,tempArray);
         }
-        return groupDiffranceDataFrame;
+        return groupDifferanceDataFrame;
     }
 
+    /**
+     * @param jointDataFrame HashMap NameAndGenus, List Integer
+     * @param size Integer size of the expected int array in the hashmap
+     * This function corrects missing values in the hashmap entry's that don't match the size of expected int array
+     * Missing values are replaced with 0
+     */
     static void correctHashmapValueLength(HashMap<NameAndGenus, List<Integer>> jointDataFrame, int size) {
         for(List<Integer> currentValues : jointDataFrame.values()){
             if(currentValues.size() < size){
-                int arrydif = size -currentValues.size();
-                for(int k = 0; k < arrydif; k++){currentValues.add(0);}
+                int arrayDifferance = size-currentValues.size();
+                for(int k = 0; k < arrayDifferance; k++){currentValues.add(0);}
             }
         }
     }
 
-    private void filterLowAbundences(HashMap<NameAndGenus, List<Integer>> jointDataFrame) {
+    /**
+     * @param jointDataFrame Hashmap NameAndGenus List<Integer>
+     * This Method Makes a list of entry's to remove if all value's in the entry are below the minamum abundonce count
+     * After which All the entry's in the list are removed from the Hashmap
+     */
+    private void filterlowAbundences(HashMap<NameAndGenus, List<Integer>> jointDataFrame) {
         List<NameAndGenus> removalList = new ArrayList<>();
-        for(NameAndGenus x : jointDataFrame.keySet()){
-            List<Integer> currentList = jointDataFrame.get(x);
+        for(NameAndGenus currentKey : jointDataFrame.keySet()){
+            List<Integer> currentList = jointDataFrame.get(currentKey);
             int count = 0;
             for(int i =0; i < currentList.size();i++){
                 int currentValue = currentList.get(i);
                 if (currentValue <= minAbundanceCount){ count++;}
             }
-            if (count == currentList.size()){removalList.add(x);}
+            if (count == currentList.size()){removalList.add(currentKey);}
         }
         for(int y = 0; y < removalList.size(); y++){
             jointDataFrame.remove(removalList.get(y));}
     }
 
+    /**
+     * @return JointDataFrame Hashmap NameAndGenus List Integer
+     * This method merges all the samplegroup object statframe hashmap NameAndGenus, Int to a new NameAndGenus list
+     * Integer Hashmap. Missing values in the array are replaced with 0
+     */
     private HashMap<NameAndGenus, List<Integer>> mergeSampleGroupData() {
         HashMap<NameAndGenus, List<Integer>> jointDataFrame = new HashMap<>();
-        for (int i = 0; i < sampleGroups.size(); i++ ){
-            SampleGroup sampleCurrentGroup = sampleGroups.get(i);
+        for (int currentSampleGroupIndex = 0; currentSampleGroupIndex < sampleGroups.size(); currentSampleGroupIndex++ ){
+            //Sample loop
+            SampleGroup sampleCurrentGroup = sampleGroups.get(currentSampleGroupIndex);
             HashMap<NameAndGenus, Integer> currentHashMap = sampleCurrentGroup.getGroupStatframe();
 
-            for (NameAndGenus j : currentHashMap.keySet()) {
-                int keyvalue = currentHashMap.get(j);
-                if (!jointDataFrame.containsKey(j)){
-                    makeNewKeyValue(i, keyvalue, jointDataFrame, j);
+            for (NameAndGenus currentKey : currentHashMap.keySet()) {
+                //New hashmap loop inserting statframe hashmap values
+                int currentValue = currentHashMap.get(currentKey);
+                if (!jointDataFrame.containsKey(currentKey)){
+                    makeNewKeyValue(currentSampleGroupIndex, currentValue, jointDataFrame, currentKey);
                 }else {
-                    replaceWithNewKeyValue(jointDataFrame, j, i, keyvalue);
+                    replaceWithNewKeyValue(jointDataFrame, currentKey, currentSampleGroupIndex, currentValue);
                 }
             }
         }
-
         return jointDataFrame;
 
 
     }
 
+    /**
+     * @param abundanceList list of integers
+     * @return integer result
+     * the result integer is the sum of the absolute value of all the values in the param list
+     */
     private int getAbsoluteValue(List<Integer> abundanceList){
         int result = 0;
         int sum = 0;
@@ -186,6 +247,12 @@ public class GroupAnalyser {
         return result;
     }
 
+    /**
+     * @param dataFrame Hashmap NameAndGenus, List Integer
+     * @return Hashmap[Size=10] NameAndGenus, List Integer
+     * This Method sorts all the entry's in the Param hashmap based on the sum of the absolute values in the integer list
+     * It returns a new Hashmap with the 10 most changed entry's
+     */
     private HashMap<NameAndGenus, List<Integer>> getTopTen(HashMap<NameAndGenus, List<Integer>> dataFrame){
         HashMap<NameAndGenus, Integer> unsortedHashMap = new HashMap<>();
         for ( Map.Entry<NameAndGenus, List<Integer>> entry: dataFrame.entrySet()){
@@ -196,6 +263,7 @@ public class GroupAnalyser {
         sortingList.sort(Map.Entry.comparingByValue());
 
         HashMap<NameAndGenus, List<Integer>> topTenSortedHashMap = new LinkedHashMap<>(10);
+        // Sorted list is set from low to high so last 10 will be used in the hashmap
         int sortingListSize = sortingList.size();
         int sortingListIndex = sortingList.size() - 10;
         
@@ -207,22 +275,38 @@ public class GroupAnalyser {
         return topTenSortedHashMap;
     }
 
+    /**
+     * @param compareColNames List of Strings containing coll names of the compare hashmap
+     * @param compareHashmap Hashmap NameAndGenus list Integer
+     * @param topTenSortedHashMap Hashmap NameAndGenus list Integer [Size=10] based on compareHashMap
+     * @param sampleGroups List of SampleGroup Object
+     * @param jointGroupDataframe Hashmap NameAndGenus List Integer containing the abundances of all the groups pre
+     * stat calculation
+     * This passes the hashmaps made in the doStatistic method and the groupDataFrame's in the SampleGroup objects
+     * into the MctFileWriter Along with the coll names that match the index of the integer list
+     *                            and the outputResultFolder
+     */
     private void printStatistics(List<String> compareColNames, HashMap<NameAndGenus, List<Integer>> compareHashmap,
-                                 HashMap<NameAndGenus, List<Integer>> topTenSortedHashMap, List<SampleGroup> sampleGroups) {
+                                 HashMap<NameAndGenus, List<Integer>> topTenSortedHashMap, List<SampleGroup> sampleGroups,
+                                 HashMap<NameAndGenus,List<Integer>> jointGroupDataframe) {
 
         String topTenFileName = "TopTen";
-        MtcFileWriter topTenFileWriter = new MtcFileWriter(compareColNames,topTenSortedHashMap, resultFolder, topTenFileName);
+        MctFileWriter topTenFileWriter = new MctFileWriter(compareColNames,topTenSortedHashMap, resultFolder, topTenFileName);
         topTenFileWriter.printDataFrame();
 
         String compareFileName = "GroupComparison";
-        MtcFileWriter compareFileWriter = new MtcFileWriter(compareColNames,compareHashmap,resultFolder, compareFileName);
+        MctFileWriter compareFileWriter = new MctFileWriter(compareColNames,compareHashmap,resultFolder, compareFileName);
         compareFileWriter.printDataFrame();
+
+        String groupStatFileName = "GroupStat";
+        MctFileWriter groupStatFileWriter = new MctFileWriter(groupNames,jointGroupDataframe,resultFolder,groupStatFileName);
+        groupStatFileWriter.printDataFrame();
 
         for  (SampleGroup sampleGroup : sampleGroups) {
             String fileName = sampleGroup.getGroupName();
             List<String> colNames = sampleGroup.getSampleNames();
             HashMap<NameAndGenus,List<Integer>> dataFrame = sampleGroup.getGroupDataframe();
-            MtcFileWriter sampleFileWriter = new MtcFileWriter(colNames,dataFrame,resultFolder,fileName);
+            MctFileWriter sampleFileWriter = new MctFileWriter(colNames,dataFrame,resultFolder,fileName);
             sampleFileWriter.printDataFrame();
         }
 
