@@ -1,16 +1,17 @@
 package nl.bioinf.io;
 /**
- * text
  * @author Ivar Lottman
- * @version 0
+ * @version 1
+ * This class determent's the Analysis type when comparing the different sample groups
  * */
 public enum AnalysisType {
-
     NUMBER("Changes between groups will be expressed between the count diffrance number"),
-    PERCENTAGE("Changes between groups will be expressed in the percentage of the count diffrance");
+    PERCENTAGE("Changes between groups will be expressed in the percentage of the count diffrance"){
+        @Override
+        public int calculateDifferenceByAnalysisType(int countOne, int countTwo) {return countOne/countTwo*100;}
+    };
 
     private final String AnalysisTypeDescription;
-    AnalysisType(String description) {this.AnalysisTypeDescription = description;}
 
     public static AnalysisType fromString(String description) {
         switch (description) {
@@ -20,13 +21,10 @@ public enum AnalysisType {
     }
 
     public int calculateDifferenceByAnalysisType(int countOne, int countTwo) {
-        int result = 0;
-
-        if (this == NUMBER){result = countOne-countTwo;}
-        else if (this == PERCENTAGE){result = countOne/countTwo*100;};
-
-        return result;
+        return countOne - countTwo;
     }
+
+    AnalysisType(String description) {this.AnalysisTypeDescription = description;}
 
     @Override
     public String toString() {return AnalysisTypeDescription;}
