@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * @author Ivar Lottman
@@ -14,7 +15,7 @@ import java.util.List;
  * This class builds a sample group based on the samplepaths provided
  */
 public class SampleGroup {
-
+    private static final Logger logger = Logger.getLogger(SampleGroup.class.getName());
     private List<Sample> samples;
     private String groupName;
     private StatsMethodType applyStatsMethod;
@@ -31,14 +32,17 @@ public class SampleGroup {
         this.samplePaths = samplePaths;
         this.samples = new ArrayList<>();
         this.sampleNames = new ArrayList<>();
+        logger.info("Creating sample group:"+ groupName);
         for (int i = 0; i < samplePaths.size(); i++) {
             Path samplePath = samplePaths.get(i);
             FileReader newSampleReader = new FileReader(samplePath, countType, taxon);
             samples.add(newSampleReader.getSample());
             sampleNames.add(newSampleReader.getSample().sampleName());
         }
+        logger.info("Creating group dataframe");
         this.groupDataframe = createDataFrame();
         this.groupStatframe = extractStatFrame();
+        logger.info("Finish creating group:"+groupName);
     }
 
     /**

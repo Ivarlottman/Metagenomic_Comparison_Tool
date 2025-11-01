@@ -1,6 +1,8 @@
 package nl.bioinf.data_management;
 
 import nl.bioinf.io.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -21,7 +23,7 @@ import static nl.bioinf.data_management.SampleGroup.replaceWithNewKeyValue;
  * writes the created csv's
  */
 public class GroupAnalyser {
-
+    private static final Logger logger = LogManager.getLogger(GroupAnalyser.class);
     private Path[] groupPaths;
     private List<SampleGroup> sampleGroups;
     private AnalysisType analysisType;
@@ -40,7 +42,9 @@ public class GroupAnalyser {
         this.outputFile = outputFile;
         this.analysisType = analysisType;
         this.minAbundanceCount = minAbundanceCount;
+        logger.info("Initializing Sample Groups");
         init(groupPaths, statmethod, taxonLevel, countType, outputFile);
+        logger.info("Finished building Sample Groups");
     }
 
     /**
@@ -60,6 +64,8 @@ public class GroupAnalyser {
         Path outputPath = Paths.get(outputFile);
         String outputAbsoluteStringPath = outputPath.toAbsolutePath().toString();
         File resultFolder = new File(outputAbsoluteStringPath+"_result","Dataframes");
+        logger.debug(outputAbsoluteStringPath+"_result");
+
         resultFolder.mkdirs();
         this.resultFolder = resultFolder;
 
@@ -92,7 +98,7 @@ public class GroupAnalyser {
                 else throw new IOException("File not readable "+line);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("Error reading file "+ inputPath, e);
         }
         return paths;
     }
@@ -107,19 +113,20 @@ public class GroupAnalyser {
      * Lastly all the hashmaps get writen to csv
      */
     public void doStatistics(){
-
+        logger.info("Started merging Sample groups");
         HashMap<NameAndGenus, List<Integer>> jointDataFrame = mergeSampleGroupData();
 
         filterlowAbundences(jointDataFrame);
         correctHashmapValueLength(jointDataFrame, sampleGroups.size());
 
         HashMap<NameAndGenus, List<Integer>> groupDifferanceDataFrame = calculateGroupDifferance(jointDataFrame);
-
+        logger.info("Finished merging Sample groups");
         List<String> groupDifferanceColNames = getGroupDifferanceColNames();
 
         HashMap<NameAndGenus,List<Integer>> topTenDataFrame = getTopTen(groupDifferanceDataFrame);
-
+        logger.info("Started Writing CSV files");
         printStatistics(groupDifferanceColNames, groupDifferanceDataFrame, topTenDataFrame, sampleGroups, jointDataFrame);
+        logger.info("Finished writing CSV files");
     }
 
     /**
@@ -139,6 +146,7 @@ public class GroupAnalyser {
             newString.append(endString);
             groupDifferanceColNames.add(newString.toString());
         }
+        logger.debug("groupDifferanceColNames: "+groupDifferanceColNames);
         return groupDifferanceColNames;
     }
 
@@ -165,6 +173,7 @@ public class GroupAnalyser {
             }
             groupDifferanceDataFrame.put(currentKey,tempArray);
         }
+        logger.debug("groupDifferanceDataFrame: "+groupDifferanceDataFrame);
         return groupDifferanceDataFrame;
     }
 
@@ -201,6 +210,7 @@ public class GroupAnalyser {
         }
         for(int y = 0; y < removalList.size(); y++){
             jointDataFrame.remove(removalList.get(y));}
+        logger.debug("removalList: "+removalList);
     }
 
     /**
@@ -225,6 +235,7 @@ public class GroupAnalyser {
                 }
             }
         }
+        logger.debug("Merged dataframe "+jointDataFrame);
         return jointDataFrame;
 
 
@@ -241,7 +252,9 @@ public class GroupAnalyser {
         int len = abundanceList.size();
         for (int j = 0; j < len; j++) {
             int absoluteValue = Math.abs(abundanceList.get(j));
-            sum = Math.addExact(sum, absoluteValue);
+            try {
+                sum = Math.addExact(sum, absoluteValue);
+            }catch (ArithmeticException e){logger.error("While comparing groups the sum of the absolute value exceeded integer capacity");}
         }
         result = sum;
         return result;

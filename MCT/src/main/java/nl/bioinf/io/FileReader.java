@@ -1,5 +1,6 @@
 package nl.bioinf.io;
 
+import nl.bioinf.data_management.GroupAnalyser;
 import nl.bioinf.data_management.Sample;
 import nl.bioinf.data_management.TaxonCount;
 
@@ -9,6 +10,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * @author Ivar Lottman
@@ -17,6 +20,7 @@ import java.util.List;
  * The sample object is made based on the Taxon and countType enum provided
  */
 public class FileReader {
+    private static final Logger logger = LogManager.getLogger(FileReader.class);
     private Sample sample;
     private Path samplePath;
     private Taxon taxonLevel;
@@ -40,13 +44,14 @@ public class FileReader {
      * It makes a Sample object with the filename from the filepath and the List TaxonCount record from
      * each entry in the krapport. The countType is determend by the countType enum which coresponds with the description
      * of the enum and decides the type of abundance used in the TaxonCount. The taxonLevel enum decides which taxons will
-     * be put in if the value is All evry entry will be put in the taxonCount list otherwise only the specified TaxonValue
+     * be put in if the value is All every entry will be put in the taxonCount list otherwise only the specified TaxonValue
      * will be appended in the TaxonCount list
      */
     private Sample readSample(){
 
         Sample newSample = new Sample("placeholder",new ArrayList<TaxonCount>());
         String sampleName = samplePath.getFileName().toString();
+        logger.info("Reading sample file: "+ sampleName);
 
         try(BufferedReader reader = Files.newBufferedReader(samplePath)) {
 
@@ -73,8 +78,7 @@ public class FileReader {
             }
             newSample = new Sample(sampleName, taxonCounts);
         } catch (IOException e) {
-            e.printStackTrace();
-        }
+            logger.error("Failed to read sample file: " + samplePath); }
 
         return newSample;
     }

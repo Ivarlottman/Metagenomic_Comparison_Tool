@@ -9,6 +9,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.opencsv.CSVWriter;
 
 /**
@@ -17,7 +20,7 @@ import com.opencsv.CSVWriter;
  * This is the Writer class of MCT that can write a csv file based on a hashmap and a header string
  */
 public class MctFileWriter {
-
+    private static final Logger logger = LogManager.getLogger(MctFileWriter.class);
     private List<String> header;
     private HashMap<NameAndGenus, List<Integer>> body;
     private File resultFolder;
@@ -42,6 +45,7 @@ public class MctFileWriter {
      */
     public void printDataFrame(){
         File fileLocation = new File(resultFolder,fileName+".csv");
+        logger.debug("Writing data frame to "+fileLocation.getAbsolutePath());
 
         String[] completeHeader = new String[header.size()+2];
 
@@ -78,7 +82,7 @@ public class MctFileWriter {
         csvWriter.close();
 
 
-        } catch (IOException e){e.printStackTrace();}
+        } catch (IOException e){logger.error("Failed to write data to"+ fileLocation.getAbsolutePath());}
     }
 }
 

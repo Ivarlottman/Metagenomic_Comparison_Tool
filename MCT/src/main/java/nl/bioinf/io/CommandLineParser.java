@@ -1,6 +1,8 @@
 package nl.bioinf.io;
 
 import nl.bioinf.data_management.GroupAnalyser;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.Logger;
 import picocli.CommandLine.*;
 
 import java.nio.file.Files;
@@ -15,6 +17,7 @@ import java.nio.file.Paths;
  */
 @Command(name = "CommandLineParser")
 public class CommandLineParser implements Runnable {
+    private static final Logger logger = (Logger) LogManager.getLogger(CommandLineParser.class);
 
     @Option(names = {"-o", "-output"}, description = "output file, Default value: ${DEFAULT-VALUE}")
     String outputFile = System.getProperty("user.dir");
@@ -42,17 +45,27 @@ public class CommandLineParser implements Runnable {
             "Default value: ${DEFAULT-VALUE}")
     int minAbundanceCount = 0;
 
+    @Option(names = {"-v, -verbosity"}, description = "Verbosity level")
+    String verbosity = "";
+
     @Parameters(paramLabel = "Group 1", description = "First Config file for group 1")
     String configOne;
 
     @Parameters(paramLabel = "Group 2", description = "Second Config file for group 2")
     String configTwo;
 
-    public Path getOutputFile(String outputFile) {
-            Path outputPath = Paths.get(outputFile);
-            Path readCheck = outputPath.getParent();
-                if (Files.isReadable(readCheck) == true) return outputPath;
-                else throw new IllegalArgumentException("ouptput path is not readable");
+    /**
+     * @param filePath String filepath
+     * @param validExtension String .Extension
+     * @return Boolean
+     * This method checks a filepath and its extension
+     */
+    public boolean checkFilePath(String filePath, String validExtension) {
+            //Path outputPath = Paths.get(outputFile);
+            //Path readCheck = outputPath.getParent();
+            //    if (Files.isReadable(readCheck) == true) return outputPath;
+            //    else throw new IllegalArgumentException("ouptput path is not readable");
+        return false;
     }
 
     /**
@@ -61,8 +74,11 @@ public class CommandLineParser implements Runnable {
      */
     @Override
     public void run() {
-        System.out.println("Running command line parser");
-        //try catch
+        MctLogger Mctlogger = new MctLogger();
+        //Mctlogger.applyLogger(verbosity.length());
+        Mctlogger.applyLogger(2);
+        logger.info("Starting command line parsing");
+
 
         // TODO build testcases for min abundance count
         // TODO move filereading if statement to method
